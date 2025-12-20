@@ -1,0 +1,193 @@
+@startuml
+
+enum ChangeOperation {
+  Upsert
+  Delete
+}
+
+enum UpsertMode {
+  InsertOnly
+  UpdateOnly
+  Upsert
+}
+
+class CapabilitySet {
+  +bool SupportsChangeFeed
+  +bool SupportsSnapshotRead
+  +bool SupportsBulkWrite
+  +bool SupportsTransactions
+  +bool SupportsConditionalWrite
+}
+
+class EntityType {
+  +string Name
+}
+
+class EntityKey {
+  +string Value
+}
+
+class Checkpoint {
+  +string Token
+  +DateTimeOffset ObservedAt
+}
+
+class ChangeFilter {
+  +IReadOnlyCollection<EntityType> EntityTypes
+  +DateTimeOffset? Since
+}
+
+class EntityRecord {
+  +EntityType Type
+  +EntityKey Key
+  +IDictionary<string, object?> Attributes
+}
+
+class ChangeEvent {
+  +ChangeOperation Operation
+  +EntityType Type
+  +EntityKey Key
+  +EntityRecord? Payload
+  +string? Version
+  +DateTimeOffset Timestamp
+  +IDictionary<string, object?> SourceMetadata
+}
+
+class ChangeBatch {
+  +IReadOnlyList<ChangeEvent> Events
+  +Checkpoint NextCheckpoint
+}
+
+class ApplyResult {
+  +int AppliedCount
+  +int FailedCount
+  +IReadOnlyList<string> Errors
+}
+
+class WriteResult {
+  +int WrittenCount
+  +int FailedCount
+  +IReadOnlyList<string> Errors
+}
+
+
+class MappingPlan {
+  +EntityType MapEntityType(EntityType sourceType)
+  +EntityKey MapKey(EntityType sourceType, EntityKey sourceKey)
+  +EntityRecord MapRecord(EntityRecord sourceRecord)
+}
+
+interface ITransformer {
+  +ChangeEvent Transform(ChangeEvent change)
+}
+
+interface IConflictResolver {
+  +ChangeEvent Resolve(ChangeEvent incoming, EntityRecord? currentTarget)
+}
+
+interface IDataSource {
+  +CapabilitySet GetCapabilities()
+  +Task<IReadOnlyList<EntityType>> ListEntityTypesAsync(CancellationToken ct)
+  +Task<ChangeBatch> ReadChangesAsync(Checkpoint checkpoint, ChangeFilter filter, CancellationToken ct)
+  +Task<IReadOnlyList<EntityRecord>> ReadSnapshotAsync(EntityType type, string? pageToken, int pageSize, CancellationToken ct)
+}
+
+interface IDataTarget {
+  +CapabilitySet GetCapabilities()
+  +Task<ApplyResult> ApplyChangesAsync(ChangeBatch batch, CancellationToken ct)
+  +Task<WriteResult> UpsertAsync(EntityType type, IReadOnlyList<EntityRecord> records, UpsertMode mode, CancellationToken ct)
+  +Task<WriteResult> DeleteAsync(EntityType type, IReadOnlyList<EntityKey> keys, CancellationToken ct)
+  +Task<EntityRecord?> TryGetAsync(EntityType type, EntityKey key, CancellationToken ct)
+}
+
+interface ICheckpointStore {
+  +Task<Checkpoint?> LoadAsync(string jobId, CancellationToken ct)
+  +Task SaveAsync(string jobId, Checkpoint checkpoint, CancellationToken ct)
+}
+
+enum JobStatus {
+  Created
+  Bootstrapping
+  Running
+  Paused
+  Stopped
+  Faulted
+}
+
+class JobProgress {
+  +long ProcessedChanges
+  +long AppliedChanges
+  +long FailedChanges
+  +DateTimeOffset? LastSuccessfulApplyAt
+  +Checkpoint? LastCheckpoint
+  +string? LastError
+}
+
+interface IJobStateStore {
+  +JobStatus GetStatus(string jobId)
+  +JobProgress GetProgress(string jobId)
+  +void SetStatus(string jobId, JobStatus status)
+  +void UpdateProgress(string jobId, JobProgress progress)
+  +void AppendLog(string jobId, string message)
+  +IReadOnlyList<string> ReadLogs(string jobId, int tail)
+}
+
+class SyncJob {
+  +string JobId
+  +IDataSource Source
+  +IDataTarget Target
+  +MappingPlan Mapping
+  +ICheckpointStore Checkpoints
+  +IConflictResolver ConflictResolver
+  +IReadOnlyList<ITransformer> Transformers
+  +ChangeFilter Filter
+  +int BatchSize
+}
+
+class SyncEngine {
+  +Task RunAsync(SyncJob job, CancellationToken ct)
+  +Task BootstrapAsync(SyncJob job, CancellationToken ct)
+  +Task ProcessOnceAsync(SyncJob job, CancellationToken ct)
+}
+
+class ChangePipeline {
+  +ChangeBatch MapAndTransform(ChangeBatch batch, MappingPlan mapping, IReadOnlyList<ITransformer> transformers)
+}
+
+class RetryPolicy {
+  +Task<T> ExecuteAsync<T>(Func<Task<T>> action, CancellationToken ct)
+}
+
+class PostgresSource
+class PostgresTarget
+class DDBSource
+class DDBTarget
+
+PostgresSource ..|> IDataSource
+DDBSource ..|> IDataSource
+PostgresTarget ..|> IDataTarget
+DDBTarget ..|> IDataTarget
+
+SyncEngine --> SyncJob
+SyncEngine --> ChangePipeline
+SyncEngine --> RetryPolicy
+
+SyncJob o--> IDataSource
+SyncJob o--> IDataTarget
+SyncJob o--> MappingPlan
+SyncJob o--> ICheckpointStore
+SyncJob o--> IConflictResolver
+SyncJob o--> ITransformer
+
+ChangeBatch o--> ChangeEvent
+ChangeEvent --> EntityType
+ChangeEvent --> EntityKey
+ChangeEvent --> EntityRecord
+EntityRecord --> EntityType
+EntityRecord --> EntityKey
+
+MappingPlan --> EntityType
+MappingPlan --> EntityKey
+MappingPlan --> EntityRecord
+
+@enduml
