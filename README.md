@@ -1,5 +1,11 @@
 # idou
 
-移動 means migration in Japanese.
+`移動　(idō)` means migration in Japanese.
 
-The project aims to provide sync between databases.
+This project aims to provide syncing between different databases.
+
+## Development
+
+The current architecture plan is as follows.
+
+![architecture](./docs/exports/architecture.svg)
