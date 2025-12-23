@@ -50,7 +50,7 @@ class ChangeEvent {
   +EntityRecord? Payload
   +string? Version
   +DateTimeOffset Timestamp
-  +IDictionary<string, object?> SourceMetadata
+  +IDictionary<string, object?> Metadata
 }
 
 class ChangeBatch {
@@ -145,9 +145,9 @@ class SyncJob {
 }
 
 class SyncEngine {
-  +Task RunAsync(SyncJob job, CancellationToken ct)
-  +Task BootstrapAsync(SyncJob job, CancellationToken ct)
-  +Task ProcessOnceAsync(SyncJob job, CancellationToken ct)
+  +Task RunAsync(SyncJob job, CancellationToken cancellationToken)
+  +Task BootstrapAsync(SyncJob job, CancellationToken cancellationToken)
+  +Task ProcessOnceAsync(SyncJob job, CancellationToken cancellationToken)
 }
 
 class ChangePipeline {
@@ -155,7 +155,7 @@ class ChangePipeline {
 }
 
 class RetryPolicy {
-  +Task<T> ExecuteAsync<T>(Func<Task<T>> action, CancellationToken ct)
+  +Task<T> ExecuteAsync<T>(Func<Task<T>> action, CancellationToken cancellationToken )
 }
 
 class PostgresSource
