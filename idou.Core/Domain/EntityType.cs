@@ -1,6 +1,6 @@
 namespace idou.Core.Domain;
 
-public class EntityType
+public class EntityType(string name)
 {
-    public string Name { get; }
+    public string Name { get; } = name;
 }

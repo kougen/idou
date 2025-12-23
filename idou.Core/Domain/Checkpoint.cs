@@ -1,7 +1,7 @@
 namespace idou.Core.Domain;
 
-public class Checkpoint
+public class Checkpoint(string token)
 {
-    public string Token { get; }
-    DateTimeOffset ObservedAt { get; }
+    public string Token { get; } = token;
+    public DateTimeOffset ObservedAt { get; } = DateTimeOffset.UtcNow;
 }

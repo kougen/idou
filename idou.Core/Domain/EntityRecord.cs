@@ -1,8 +1,8 @@
 namespace idou.Core.Domain;
 
-public class EntityRecord
+public record EntityRecord
 {
-    public EntityKey Key { get; }
-    public EntityType Type { get; }
-    public IDictionary<string, object?> Attributes { get; }
+    public required EntityKey Key { get; init; }
+    public required EntityType Type { get; init; }
+    public required IDictionary<string, object?> Attributes { get; init; }
 }
