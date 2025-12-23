@@ -171,6 +171,11 @@ DDBTarget ..|> IDataTarget
 SyncEngine --> SyncJob
 SyncEngine --> ChangePipeline
 SyncEngine --> RetryPolicy
+SyncEngine ..> IJobStateStore : reports status/progress
+SyncEngine ..> IConflictResolver : resolves conflicts
+SyncEngine ..> ICheckpointStore : loads/saves checkpoints
+SyncEngine ..> IDataSource : reads changes/snapshots
+SyncEngine ..> IDataTarget : applies changes
 
 SyncJob o--> IDataSource
 SyncJob o--> IDataTarget
