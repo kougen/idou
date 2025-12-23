@@ -71,7 +71,7 @@ class WriteResult {
 }
 
 
-class MappingPlan {
+interface IMappingPlan {
   +EntityType MapEntityType(EntityType sourceType)
   +EntityKey MapKey(EntityType sourceType, EntityKey sourceKey)
   +EntityRecord MapRecord(EntityRecord sourceRecord)
@@ -136,7 +136,7 @@ class SyncJob {
   +string JobId
   +IDataSource Source
   +IDataTarget Target
-  +MappingPlan Mapping
+  +IMappingPlan Mapping
   +ICheckpointStore Checkpoints
   +IConflictResolver ConflictResolver
   +IReadOnlyList<ITransformer> Transformers
@@ -151,7 +151,7 @@ class SyncEngine {
 }
 
 class ChangePipeline {
-  +ChangeBatch MapAndTransform(ChangeBatch batch, MappingPlan mapping, IReadOnlyList<ITransformer> transformers)
+  +ChangeBatch MapAndTransform(ChangeBatch batch, IMappingPlan mapping, IReadOnlyList<ITransformer> transformers)
 }
 
 class RetryPolicy {
@@ -179,7 +179,7 @@ SyncEngine ..> IDataTarget : applies changes
 
 SyncJob o--> IDataSource
 SyncJob o--> IDataTarget
-SyncJob o--> MappingPlan
+SyncJob o--> IMappingPlan
 SyncJob o--> ICheckpointStore
 SyncJob o--> IConflictResolver
 SyncJob o--> ITransformer
@@ -191,8 +191,8 @@ ChangeEvent --> EntityRecord
 EntityRecord --> EntityType
 EntityRecord --> EntityKey
 
-MappingPlan --> EntityType
-MappingPlan --> EntityKey
-MappingPlan --> EntityRecord
+IMappingPlan --> EntityType
+IMappingPlan --> EntityKey
+IMappingPlan --> EntityRecord
 
 @enduml
