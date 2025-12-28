@@ -264,6 +264,8 @@ __pycache__/
 .idea/**/shelf
 .idea/*/.idea/projectSettingsUpdater.xml
 .idea/*/.idea/encodings.xml
+.idea/*/.idea/vcs.xml
+.idea/*/.idea/indexLayout.xml
 
 # Generated files
 .idea/**/contentModel.xml
