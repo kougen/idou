@@ -180,6 +180,8 @@ public sealed class ChangePipelineTests
 
     private sealed class RecordingMappingPlan : IMappingPlan
     {
+        public bool IsValid => true;
+
         private readonly Func<EntityType, EntityType> _mapEntityType;
         private readonly Func<EntityType, EntityKey, EntityKey> _mapKey;
         private readonly Func<EntityRecord, EntityRecord> _mapRecord;

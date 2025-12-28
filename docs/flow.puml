@@ -1,0 +1,82 @@
+@startuml
+
+title Sync Job Execution Flow
+
+start
+
+:SyncEngine.RunAsync(job);
+
+:JobStateStore.SetStatus(Running);
+
+:Load Checkpoint;
+note right
+ICheckpointStore.LoadAsync(jobId)
+end note
+
+if (Checkpoint exists?) then (no)
+  :Bootstrap mode;
+  repeat
+    :Read snapshot page;
+    note right
+    IDataSource.ReadSnapshotAsync
+    end note
+
+    :Map & Transform;
+    note right
+    ChangePipeline
+    - IMappingPlan
+    - ITransformer[]
+    end note
+
+    :Apply upserts;
+    note right
+    IDataTarget.UpsertAsync
+    end note
+
+    :Update progress;
+    note right
+    IJobStateStore.UpdateProgress
+    end note
+  repeat while (More pages?)
+else (yes)
+  :Incremental mode;
+  repeat
+    :Read changes;
+    note right
+    IDataSource.ReadChangesAsync
+    end note
+
+    :Map & Transform;
+    note right
+    ChangePipeline
+    end note
+
+    if (Conflict resolution enabled?) then (yes)
+      :Resolve conflicts;
+      note right
+      IConflictResolver.Resolve
+      (may call IDataTarget.TryGetAsync)
+      end note
+    endif
+
+    :Apply changes;
+    note right
+    IDataTarget.ApplyChangesAsync
+    end note
+
+    :Save checkpoint;
+    note right
+    ICheckpointStore.SaveAsync
+    end note
+
+    :Update progress;
+    note right
+    IJobStateStore.UpdateProgress
+    end note
+  repeat while (Continue & not cancelled)
+endif
+
+:JobStateStore.SetStatus(Stopped);
+
+stop
+@enduml
