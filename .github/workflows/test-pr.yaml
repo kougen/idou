@@ -30,7 +30,6 @@ jobs:
             **/*.fsproj
             **/*.vbproj
             **/packages.lock.json
-            **/nuget.config
 
       - name: Restore/Build/Test
         run: >
