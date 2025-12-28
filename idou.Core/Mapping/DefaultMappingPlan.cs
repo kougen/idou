@@ -4,6 +4,8 @@ namespace idou.Core.Mapping;
 
 public class DefaultMappingPlan : IMappingPlan
 {
+    public bool IsValid => true;
+
     public EntityType MapEntityType(EntityType sourceType)
     {
         return sourceType;
