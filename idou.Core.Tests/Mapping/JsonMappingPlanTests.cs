@@ -38,6 +38,16 @@ public class JsonMappingPlanTests
     }
 
     [Fact]
+    public void MapsTheEntityType_CaseInsensitive_WhenTheMappingExists()
+    {
+        var plan = new JsonMappingPlan("Mapping/assets/valid.json");
+        var sourceType = new EntityType("UsErS");
+        var mapped = plan.MapEntityType(sourceType);
+        Assert.True(plan.IsValid);
+        Assert.Equal("accounts", mapped.Name);
+    }
+
+    [Fact]
     public void DoesNotMapTheEntityType_WhenNoMappingExists()
     {
         var plan = new JsonMappingPlan("Mapping/assets/valid.json");

@@ -10,7 +10,7 @@ public sealed class JsonMappingPlan : IMappingPlan
     public JsonMappingPlan(string filePath)
     {
         if (!File.Exists(filePath))
-            throw new FileNotFoundException(filePath);
+            throw new FileNotFoundException($"Mapping file not found: {filePath}");
 
         var mappings = JsonConvert.DeserializeObject<List<JsonMapping>>(
             File.ReadAllText(filePath)
