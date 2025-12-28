@@ -57,4 +57,37 @@ public class JsonMappingPlanTests
 
         Assert.Equal(sourceType.Name, mapped.Name);
     }
+
+    [Fact]
+    public void MapsTheEntityKey_WhenTheMappingExists()
+    {
+        var plan = new JsonMappingPlan("Mapping/assets/valid.json");
+        var sourceType = new EntityType("users");
+        var sourceKey = new EntityKey("u1");
+
+        var mappedKey = plan.MapKey(sourceType, sourceKey);
+
+        Assert.Equal(sourceKey.Value, mappedKey.Value);
+    }
+
+    [Fact]
+    public void MapsTheEntityRecord_WhenTheMappingExists()
+    {
+        var plan = new JsonMappingPlan("Mapping/assets/valid.json");
+        var sourceRecord = new EntityRecord
+        {
+            Type = new EntityType("users"),
+            Key = new EntityKey("u1"),
+            Attributes = new Dictionary<string, object?>
+            {
+                { "name", "Alice" }
+            }
+        };
+
+        var mappedRecord = plan.MapRecord(sourceRecord);
+
+        Assert.Equal("accounts", mappedRecord.Type.Name);
+        Assert.Equal(sourceRecord.Key.Value, mappedRecord.Key.Value);
+        Assert.Equal(sourceRecord.Attributes["name"], mappedRecord.Attributes["name"]);
+    }
 }
