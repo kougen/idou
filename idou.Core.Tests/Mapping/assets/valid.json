@@ -1,6 +1,6 @@
 [
   {
-    "source": "column1",
-    "target": "targetColumn1"
+    "source": "users",
+    "target": "accounts"
   }
 ]

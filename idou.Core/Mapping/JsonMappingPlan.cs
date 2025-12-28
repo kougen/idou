@@ -3,25 +3,29 @@ using Newtonsoft.Json;
 
 namespace idou.Core.Mapping;
 
-public class JsonMappingPlan : IMappingPlan
+public sealed class JsonMappingPlan : IMappingPlan
 {
-    private readonly IList<JsonMapping> _mappings;
+    private readonly IReadOnlyDictionary<string, JsonMapping> _bySource;
 
     public JsonMappingPlan(string filePath)
     {
         if (!File.Exists(filePath))
-        {
             throw new FileNotFoundException(filePath);
-        }
 
-        _mappings = JsonConvert.DeserializeObject<IList<JsonMapping>>(File.ReadAllText(filePath))?.ToList() ?? [];
+        var mappings = JsonConvert.DeserializeObject<List<JsonMapping>>(
+            File.ReadAllText(filePath)
+        ) ?? throw new InvalidOperationException("Invalid mapping file");
+
+        _bySource = mappings.ToDictionary(m => m.Source, StringComparer.OrdinalIgnoreCase);
     }
 
-    public bool IsValid => _mappings.Any();
+    public bool IsValid => _bySource.Count > 0;
 
     public EntityType MapEntityType(EntityType sourceType)
     {
-        return sourceType;
+        return _bySource.TryGetValue(sourceType.Name, out var mapping)
+            ? new EntityType(mapping.Target)
+            : sourceType;
     }
 
     public EntityKey MapKey(EntityType sourceType, EntityKey sourceKey)
@@ -31,6 +35,14 @@ public class JsonMappingPlan : IMappingPlan
 
     public EntityRecord MapRecord(EntityRecord sourceRecord)
     {
-        return sourceRecord;
+        var targetType = MapEntityType(sourceRecord.Type);
+        var targetKey = MapKey(sourceRecord.Type, sourceRecord.Key);
+
+        return new EntityRecord
+        {
+            Key = targetKey,
+            Type = targetType,
+            Attributes = new Dictionary<string, object?>(sourceRecord.Attributes)
+        };
     }
 }
