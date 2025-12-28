@@ -22,4 +22,13 @@
       <ProjectReference Include="..\idou.Core\idou.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Mapping\assets\valid.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Mapping\assets\empty.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
