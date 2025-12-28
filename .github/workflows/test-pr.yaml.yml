@@ -1,0 +1,98 @@
+name: Run Tests on Pull Request
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            **/*.fsproj
+            **/*.vbproj
+            **/packages.lock.json
+            **/nuget.config
+
+      - name: Restore/Build/Test
+        run: >
+          dotnet test
+          --configuration Release
+          --verbosity normal
+          --logger "trx"
+          --results-directory "${{ github.workspace }}/TestResults"
+          --collect:"XPlat Code Coverage"
+
+      - name: Combine Coverage Reports
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@v5.5.0
+        with:
+          reports: "${{ github.workspace }}/TestResults/**/coverage.cobertura.xml"
+          targetdir: "${{ github.workspace }}/coverage"
+          reporttypes: "Cobertura"
+          verbosity: "Info"
+          title: "Code Coverage"
+          tag: "${{ github.run_number }}_${{ github.run_id }}"
+          toolpath: "reportgeneratortool"
+
+      - name: Upload Combined Coverage XML
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage
+          path: ${{ github.workspace }}/coverage/Cobertura.xml
+          retention-days: 5
+
+      - name: Publish Code Coverage Report
+        if: always()
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: "coverage/Cobertura.xml"
+          badge: true
+          fail_below_min: false
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: false
+          indicators: true
+          output: both
+          thresholds: "10 30"
+
+      - name: Add Coverage PR Comment
+        if: github.event_name == 'pull_request' && always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          path: code-coverage-results.md
+
+      - name: Upload Test Result Files
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-results
+          path: ${{ github.workspace }}/TestResults/**/*
+          retention-days: 5
+
+      - name: Publish Test Results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2.21.0
+        with:
+          # NOTE: using trx_files instead of files due to https://github.com/EnricoMi/publish-unit-test-result-action/issues/424
+          trx_files: "${{ github.workspace }}/TestResults/**/*.trx"
