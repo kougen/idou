@@ -94,5 +94,4 @@ jobs:
         if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2.21.0
         with:
-          # NOTE: using trx_files instead of files due to https://github.com/EnricoMi/publish-unit-test-result-action/issues/424
-          trx_files: "${{ github.workspace }}/TestResults/**/*.trx"
+          files: "${{ github.workspace }}/TestResults/**/*.trx"
