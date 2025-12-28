@@ -1,7 +1,7 @@
 namespace idou.Core.Domain;
 
-public class ChangeFilter
+public class ChangeFilter(IReadOnlyCollection<EntityType> entityTypes, DateTimeOffset? since)
 {
-    public IReadOnlyCollection<EntityType> EntityTypes { get; }
-    public DateTimeOffset? Since { get; }
+    public IReadOnlyCollection<EntityType> EntityTypes { get; } = entityTypes;
+    public DateTimeOffset? Since { get; } = since;
 }
