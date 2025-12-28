@@ -1,7 +1,7 @@
 namespace idou.Core.Mapping;
 
-public class JsonMapping
+public record JsonMapping
 {
-    public string Source { get; set; }
-    public string Target { get; set; }
+    public required string Source { get; init; } = null!;
+    public required string Target { get; init; } = null!;
 }
