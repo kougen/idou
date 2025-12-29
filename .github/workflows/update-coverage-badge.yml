@@ -3,6 +3,16 @@ name: Update Coverage Badge
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "**/*.fsproj"
+      - "**/*.vbproj"
+      - "**/*.sln"
+      - "**/*.props"
+      - "**/*.targets"
+      - "**/packages.lock.json"
+      - "Directory.Build.*"
   workflow_dispatch:
 
 permissions:
@@ -62,8 +72,7 @@ jobs:
           delete-branch: true
           commit-message: "chore: update coverage badge"
           title: "chore: update coverage badge"
-          body: "Automated update of badges/coverage.svg from CI."
+          body: |
+            Automated update of badges/coverage.svg from CI cc @joshika39
           add-paths: |
             badges/coverage.svg
-          reviewers: |
-            joshika39
