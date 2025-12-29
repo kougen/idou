@@ -338,6 +338,5 @@ inspectcode
 
 *.GeneratedMSBuildEditorConfig.editorconfig
 
-
 .idea/.idea.idou/.idea/misc.xml
 .idea/.idea.idou/.idea/copilot.*

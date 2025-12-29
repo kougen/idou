@@ -1,6 +1,7 @@
 # idou
 
 [![CodeFactor](https://www.codefactor.io/repository/github/kougen/idou/badge)](https://www.codefactor.io/repository/github/kougen/idou)
+![coverage](./badges/coverage.svg)
 
 `移動　(idō)` means migration in Japanese.
 
