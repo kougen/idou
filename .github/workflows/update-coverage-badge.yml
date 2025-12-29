@@ -52,7 +52,7 @@ jobs:
       - name: Move badge into repo
         run: |
           mkdir -p badges
-          find coverage -type f -iname "*linecoverage*.svg" -print -quit | xargs -I{} cp {} badges/coverage.svg
+          find coverage -type f -iname "badge_linecoverage.svg" -print -quit | xargs -I{} cp {} badges/coverage.svg
           test -f badges/coverage.svg
 
       - name: Create PR with updated badge
