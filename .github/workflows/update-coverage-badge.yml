@@ -44,7 +44,8 @@ jobs:
           reports: "${{ github.workspace }}/TestResults/**/coverage.cobertura.xml"
           targetdir: "${{ github.workspace }}/coverage"
           reporttypes: "Badges;Cobertura"
-          badgeThresholds: "60;85"
+          customSettings: |
+            badgeThresholds=60;85
           verbosity: "Info"
           toolpath: "reportgeneratortool"
 
