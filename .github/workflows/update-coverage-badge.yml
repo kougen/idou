@@ -54,7 +54,7 @@ jobs:
           test -f badges/coverage.svg
 
       - name: Create PR with updated badge
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: chore/update-coverage-badge
           delete-branch: true
