@@ -1,5 +1,7 @@
 # idou
 
+[![CodeFactor](https://www.codefactor.io/repository/github/kougen/idou/badge)](https://www.codefactor.io/repository/github/kougen/idou)
+
 `移動　(idō)` means migration in Japanese.
 
 This project aims to provide syncing between different databases.

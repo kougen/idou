@@ -1,0 +1,67 @@
+name: Update Coverage Badge
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  badge-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            **/*.fsproj
+            **/*.vbproj
+            **/packages.lock.json
+
+      - name: Restore/Build/Test
+        run: >
+          dotnet test
+          --configuration Release
+          --verbosity normal
+          --results-directory "${{ github.workspace }}/TestResults"
+          --collect:"XPlat Code Coverage"
+          /p:Exclude="[idou.*.Tests*]*"
+
+      - name: Generate badge (ReportGenerator)
+        uses: danielpalme/ReportGenerator-GitHub-Action@v5.5.0
+        with:
+          reports: "${{ github.workspace }}/TestResults/**/coverage.cobertura.xml"
+          targetdir: "${{ github.workspace }}/coverage"
+          reporttypes: "Badges;Cobertura"
+          verbosity: "Info"
+          toolpath: "reportgeneratortool"
+
+      - name: Move badge into repo
+        run: |
+          mkdir -p badges
+          find coverage -type f -iname "*linecoverage*.svg" -print -quit | xargs -I{} cp {} badges/coverage.svg
+          test -f badges/coverage.svg
+
+      - name: Create PR with updated badge
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/update-coverage-badge
+          delete-branch: true
+          commit-message: "chore: update coverage badge"
+          title: "chore: update coverage badge"
+          body: "Automated update of badges/coverage.svg from CI."
+          add-paths: |
+            badges/coverage.svg
+          reviewers: |
+            joshika39
