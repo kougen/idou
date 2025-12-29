@@ -13,3 +13,7 @@ This project aims to provide syncing between different databases.
 The current architecture plan is as follows.
 
 ![architecture](./docs/exports/architecture.svg)
+
+And the basic flow is as follows.
+
+![flow](./docs/exports/flow.svg)
